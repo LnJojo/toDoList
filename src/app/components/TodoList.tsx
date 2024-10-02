@@ -144,20 +144,24 @@ export default function TodoList() {
     <div className="max-w-2xl mx-auto">
       <div className="flex space-x-4 mb-6">
         <button
-          onClick={() => setActiveTab("todos")}
-          className={`flex-1 py-2 rounded ${
-            activeTab === "todos" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
-        >
-          Tâches
-        </button>
-        <button
           onClick={() => setActiveTab("habits")}
           className={`flex-1 py-2 rounded ${
-            activeTab === "habits" ? "bg-blue-500 text-white" : "bg-gray-200"
+            activeTab === "habits"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
           }`}
         >
           Habitudes
+        </button>
+        <button
+          onClick={() => setActiveTab("todos")}
+          className={`flex-1 py-2 rounded ${
+            activeTab === "todos"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+          }`}
+        >
+          Tâches
         </button>
       </div>
 
@@ -169,7 +173,7 @@ export default function TodoList() {
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               placeholder="Ajouter une nouvelle tâche"
-              className="flex-1 p-2 border border-gray-300 rounded-l focus:outline-none focus:border-blue-500"
+              className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-l focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200"
             />
             <button
               type="submit"
@@ -184,7 +188,7 @@ export default function TodoList() {
             {todos.map((todo) => (
               <li
                 key={todo.id}
-                className="flex items-center justify-between p-3 bg-white rounded shadow hover:shadow-md transition-shadow"
+                className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded shadow hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center">
                   <input
@@ -196,8 +200,8 @@ export default function TodoList() {
                   <span
                     className={
                       todo.completed
-                        ? "line-through text-gray-500"
-                        : "text-gray-800"
+                        ? "line-through text-gray-500 dark:text-gray-400"
+                        : "text-gray-800 dark:text-gray-200"
                     }
                   >
                     {todo.text}
@@ -205,7 +209,7 @@ export default function TodoList() {
                 </div>
                 <button
                   onClick={() => deleteTodo(todo.id)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
@@ -222,7 +226,7 @@ export default function TodoList() {
                 value={newHabit}
                 onChange={(e) => setNewHabit(e.target.value)}
                 placeholder="Ajouter une nouvelle habitude"
-                className="flex-1 p-2 border border-gray-300 rounded-l focus:outline-none focus:border-blue-500"
+                className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-l focus:outline-none focus:border-blue-500 dark:bg-gray-700 dark:text-gray-200"
               />
               <button
                 type="submit"
@@ -235,41 +239,32 @@ export default function TodoList() {
           </form>
 
           <div className="flex space-x-2 mb-4">
-            <button
-              onClick={() => setHabitFilter("all")}
-              className={`px-3 py-1 rounded ${
-                habitFilter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
-              }`}
-            >
-              Tous
-            </button>
-            <button
-              onClick={() => setHabitFilter("daily")}
-              className={`px-3 py-1 rounded ${
-                habitFilter === "daily"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200"
-              }`}
-            >
-              Quotidien
-            </button>
-            <button
-              onClick={() => setHabitFilter("weekly")}
-              className={`px-3 py-1 rounded ${
-                habitFilter === "weekly"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200"
-              }`}
-            >
-              Hebdomadaire
-            </button>
+            {["all", "daily", "weekly"].map((filter) => (
+              <button
+                key={filter}
+                onClick={() =>
+                  setHabitFilter(filter as "all" | "daily" | "weekly")
+                }
+                className={`px-3 py-1 rounded ${
+                  habitFilter === filter
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                }`}
+              >
+                {filter === "all"
+                  ? "Tous"
+                  : filter === "daily"
+                  ? "Quotidien"
+                  : "Hebdomadaire"}
+              </button>
+            ))}
           </div>
 
           <ul className="space-y-2">
             {filteredHabits.map((habit) => (
               <li
                 key={habit.id}
-                className="flex items-center justify-between p-3 bg-white rounded shadow hover:shadow-md transition-shadow"
+                className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded shadow hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center flex-1">
                   <input
@@ -282,13 +277,13 @@ export default function TodoList() {
                     <span
                       className={
                         habit.completed
-                          ? "line-through text-gray-500"
-                          : "text-gray-800"
+                          ? "line-through text-gray-500 dark:text-gray-400"
+                          : "text-gray-800 dark:text-gray-200"
                       }
                     >
                       {habit.text}
                     </span>
-                    <div className="text-sm text-gray-500 flex items-center">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                       <RotateCcw className="w-4 h-4 mr-1" />
                       <select
                         value={habit.frequency}
@@ -298,7 +293,7 @@ export default function TodoList() {
                             e.target.value as "daily" | "weekly"
                           )
                         }
-                        className="bg-transparent border-none"
+                        className="bg-transparent border-none dark:bg-gray-700 dark:text-gray-200"
                       >
                         <option value="daily">Quotidien</option>
                         <option value="weekly">Hebdomadaire</option>
@@ -318,11 +313,11 @@ export default function TodoList() {
                     onChange={(e) =>
                       changeHabitCount(habit.id, parseInt(e.target.value))
                     }
-                    className="w-12 p-1 mr-2 border rounded"
+                    className="w-12 p-1 mr-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
                   />
                   <button
                     onClick={() => deleteHabit(habit.id)}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
