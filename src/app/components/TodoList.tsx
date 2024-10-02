@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PlusCircle, Trash2, RotateCcw, Edit2 } from "lucide-react";
+import { PlusCircle, Trash2, RotateCcw } from "lucide-react";
 import type { Todo, Habit } from "../types";
 
 export default function TodoList() {
@@ -17,7 +17,6 @@ export default function TodoList() {
   );
 
   useEffect(() => {
-    // Charger les données depuis localStorage au démarrage
     const loadData = () => {
       const savedTodos = localStorage.getItem("todos");
       const savedHabits = localStorage.getItem("habits");
@@ -35,7 +34,7 @@ export default function TodoList() {
     window.addEventListener("storage", loadData);
 
     return () => window.removeEventListener("storage", loadData);
-  }, []);
+  }, [isDataLoaded]);
 
   useEffect(() => {
     console.log("Saving todos:", todos);
