@@ -33,6 +33,9 @@ export default function TodoList() {
     }
     window.addEventListener("storage", loadData);
 
+    const initializeFrequency = () => setFrequency("daily");
+    initializeFrequency();
+
     return () => window.removeEventListener("storage", loadData);
   }, [isDataLoaded]);
 
