@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PlusCircle, Trash2, RotateCcw } from "lucide-react";
+import {
+  PlusCircle,
+  Trash2,
+  RotateCcw,
+  CheckCircle,
+  Circle,
+} from "lucide-react";
+//import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import type { Todo, Habit } from "../types";
 
 export default function TodoList() {
@@ -11,7 +18,7 @@ export default function TodoList() {
   const [newTask, setNewTask] = useState("");
   const [newHabit, setNewHabit] = useState("");
   const [frequency, setFrequency] = useState<"daily" | "weekly">("daily");
-  const [activeTab, setActiveTab] = useState<"todos" | "habits">("todos");
+  const [activeTab, setActiveTab] = useState<"todos" | "habits">("habits");
   const [habitFilter, setHabitFilter] = useState<"all" | "daily" | "weekly">(
     "all"
   );
@@ -93,18 +100,24 @@ export default function TodoList() {
 
   const toggleHabit = (id: number) => {
     setHabits(
-      habits.map((habit) =>
-        habit.id === id
-          ? {
-              ...habit,
-              completed: !habit.completed,
-              lastCompleted: !habit.completed ? new Date().toISOString() : null,
-              completedCount: !habit.completed
-                ? habit.completedCount + 1
-                : habit.completedCount,
-            }
-          : habit
-      )
+      habits.map((habit) => {
+        if (habit.id === id) {
+          const newCompletedCount =
+            habit.completedCount + 1 > habit.count
+              ? 0
+              : habit.completedCount + 1;
+          return {
+            ...habit,
+            completedCount: newCompletedCount,
+            completed: newCompletedCount === habit.count,
+            lastCompleted:
+              newCompletedCount === habit.count
+                ? new Date().toISOString()
+                : habit.lastCompleted,
+          };
+        }
+        return habit;
+      })
     );
   };
 
@@ -264,19 +277,23 @@ export default function TodoList() {
             {filteredHabits.map((habit) => (
               <li
                 key={habit.id}
-                className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded shadow hover:shadow-md transition-shadow"
+                className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded shadow hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => toggleHabit(habit.id)}
               >
                 <div className="flex items-center flex-1">
-                  <input
-                    type="checkbox"
-                    checked={habit.completed}
-                    onChange={() => toggleHabit(habit.id)}
-                    className="mr-3 h-5 w-5 text-blue-500"
-                  />
+                  <div className="mr-3">
+                    {habit.completedCount === habit.count ? (
+                      <CheckCircle className="w-10 h-10 text-green-500" />
+                    ) : (
+                      <Circle className="w-10 h-10 text-gray-400">
+                        <PlusCircle className="w-6 h-6 text-gray-600" />
+                      </Circle>
+                    )}
+                  </div>
                   <div className="flex-1">
                     <span
                       className={
-                        habit.completed
+                        habit.completedCount === habit.count
                           ? "line-through text-gray-500 dark:text-gray-400"
                           : "text-gray-800 dark:text-gray-200"
                       }
@@ -287,13 +304,15 @@ export default function TodoList() {
                       <RotateCcw className="w-4 h-4 mr-1" />
                       <select
                         value={habit.frequency}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          e.stopPropagation();
                           changeHabitFrequency(
                             habit.id,
                             e.target.value as "daily" | "weekly"
-                          )
-                        }
+                          );
+                        }}
                         className="bg-transparent border-none dark:bg-gray-700 dark:text-gray-200"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <option value="daily">Quotidien</option>
                         <option value="weekly">Hebdomadaire</option>
@@ -310,13 +329,18 @@ export default function TodoList() {
                     min="1"
                     max="10"
                     value={habit.count}
-                    onChange={(e) =>
-                      changeHabitCount(habit.id, parseInt(e.target.value))
-                    }
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      changeHabitCount(habit.id, parseInt(e.target.value));
+                    }}
                     className="w-12 p-1 mr-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+                    onClick={(e) => e.stopPropagation()}
                   />
                   <button
-                    onClick={() => deleteHabit(habit.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteHabit(habit.id);
+                    }}
                     className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                   >
                     <Trash2 className="w-5 h-5" />
