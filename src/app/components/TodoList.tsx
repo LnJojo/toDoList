@@ -31,7 +31,11 @@ export default function TodoList() {
       console.log("Loading data:", { savedTodos, savedHabits });
 
       if (savedTodos) setTodos(JSON.parse(savedTodos));
-      if (savedHabits) setHabits(JSON.parse(savedHabits));
+      if (savedHabits) {
+        const loadedHabits = JSON.parse(savedHabits);
+        const resetHabits = loadedHabits.map(resetHabitIfNeeded);
+        setHabits(resetHabits);
+      }
     };
 
     if (!isDataLoaded) {
@@ -45,6 +49,12 @@ export default function TodoList() {
 
     return () => window.removeEventListener("storage", loadData);
   }, [isDataLoaded]);
+
+  useEffect(() => {
+    const resetHabits = habits.map(resetHabitIfNeeded);
+    setHabits(resetHabits);
+    localStorage.setItem("habits", JSON.stringify(resetHabits));
+  }, []);
 
   useEffect(() => {
     console.log("Saving todos:", todos);
@@ -102,18 +112,19 @@ export default function TodoList() {
     setHabits(
       habits.map((habit) => {
         if (habit.id === id) {
+          const resetHabit = resetHabitIfNeeded(habit);
           const newCompletedCount =
-            habit.completedCount + 1 > habit.count
+            resetHabit.completedCount + 1 > resetHabit.count
               ? 0
-              : habit.completedCount + 1;
+              : resetHabit.completedCount + 1;
           return {
-            ...habit,
+            ...resetHabit,
             completedCount: newCompletedCount,
-            completed: newCompletedCount === habit.count,
+            completed: newCompletedCount === resetHabit.count,
             lastCompleted:
-              newCompletedCount === habit.count
+              newCompletedCount === resetHabit.count
                 ? new Date().toISOString()
-                : habit.lastCompleted,
+                : resetHabit.lastCompleted,
           };
         }
         return habit;
@@ -127,7 +138,15 @@ export default function TodoList() {
   ) => {
     setHabits(
       habits.map((habit) =>
-        habit.id === id ? { ...habit, frequency: newFrequency } : habit
+        habit.id === id
+          ? resetHabitIfNeeded({
+              ...habit,
+              frequency: newFrequency,
+              completedCount: 0,
+              completed: false,
+              lastCompleted: null,
+            })
+          : habit
       )
     );
   };
@@ -138,6 +157,30 @@ export default function TodoList() {
         habit.id === id ? { ...habit, count: newCount } : habit
       )
     );
+  };
+
+  const resetHabitIfNeeded = (habit: Habit): Habit => {
+    const now = new Date();
+    const lastCompleted = habit.lastCompleted
+      ? new Date(habit.lastCompleted)
+      : null;
+
+    if (!lastCompleted) return habit;
+
+    if (habit.frequency === "daily") {
+      if (now.toDateString() !== lastCompleted.toDateString()) {
+        return { ...habit, completedCount: 0, completed: false };
+      }
+    } else if (habit.frequency === "weekly") {
+      const weekDiff = Math.floor(
+        (now.getTime() - lastCompleted.getTime()) / (7 * 24 * 60 * 60 * 1000)
+      );
+      if (weekDiff >= 1) {
+        return { ...habit, completedCount: 0, completed: false };
+      }
+    }
+
+    return habit;
   };
 
   const filteredHabits =
